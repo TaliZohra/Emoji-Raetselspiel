@@ -4,45 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.core.animateTo
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.emoji_rtselspiel.ui.theme.EmojiRätselspielTheme
 import kotlinx.coroutines.launch
-import androidx.compose.animation.core.Animatable // Make sure this is imported
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.offset
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue // For property delegation if used elsewhere
-import androidx.compose.runtime.mutableStateOf // You'll still need this for other states
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue // For property delegation if used elsewhere
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import androidx.compose.ui.unit.IntOffset
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,21 +30,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             EmojiRätselspielTheme {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     SpielApp()
                 }
-                }
             }
         }
     }
+}
 
 @Composable
-fun Spiel(modifier: Modifier = Modifier){
+fun Spiel(modifier: Modifier = Modifier) {
     var text = remember { mutableStateOf("") }
-    var showCorrectDialog = remember { mutableStateOf(false) }
+    var correctCount = remember { mutableStateOf(0) }
+    var solvedRiddles = remember { mutableStateListOf<Int>() }
+    var showGratulationsDialog = remember { mutableStateOf(false) }
+
     var emojis = remember { mutableStateOf(1) }
     val textResource = when (emojis.value) {
         1 -> R.string.Raetsel_1
@@ -94,105 +75,128 @@ fun Spiel(modifier: Modifier = Modifier){
         10 -> R.string.Antwort_10
         else -> R.string.Antwort_1
     }
-    var antwort = stringResource(antwortResource)
 
+    val antwort = stringResource(antwortResource)
+
+    val scope = rememberCoroutineScope()
     var jiggleTrigger by remember { mutableStateOf(false) }
     val offsetX = remember { Animatable(0f) }
 
-    LaunchedEffect(jiggleTrigger) { // Key is the integer count
-        if (jiggleTrigger) { // Only run if triggered (not on initial composition or if reset to 0)
-            launch {
-                offsetX.animateTo(targetValue = -10f, animationSpec = tween(durationMillis = 50))
-                offsetX.animateTo(targetValue = 10f, animationSpec = tween(durationMillis = 50))
-                offsetX.animateTo(targetValue = -10f, animationSpec = tween(durationMillis = 50))
-                offsetX.animateTo(targetValue = 10f, animationSpec = tween(durationMillis = 50))
-                offsetX.animateTo(targetValue = 0f, animationSpec = tween(durationMillis = 50))
+    LaunchedEffect(jiggleTrigger) {
+        if (jiggleTrigger) {
+            scope.launch {
+                offsetX.animateTo(-10f, tween(50))
+                offsetX.animateTo(10f, tween(50))
+                offsetX.animateTo(-10f, tween(50))
+                offsetX.animateTo(10f, tween(50))
+                offsetX.animateTo(0f, tween(50))
                 jiggleTrigger = false
             }
-
         }
     }
-    Column(modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+
+    var showCorrectFlash by remember { mutableStateOf(false) }
+    if (showCorrectFlash) {
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(250)
+            showCorrectFlash = false
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .background(if (showCorrectFlash) Color(0xFFA5D6A7) else MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.TopEnd
+
     ) {
-        Text("Errate das Sprichwort!",
-            fontSize = 50.sp,
-            lineHeight = 50.sp,
-            textAlign = TextAlign.Center)
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+        Text("Richtige Antworten: ${correctCount.value}",
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            )
+
+        Column(
+            modifier = Modifier
+                .padding(top = 50.dp, start = 24.dp, end = 24.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            Text(
+                "Errate das Wort!",
+                fontSize = 40.sp,
+                lineHeight = 44.sp,
+                textAlign = TextAlign.Center
+            )
+
             Text(
                 text = stringResource(textResource),
                 modifier = Modifier
-                    .offset{
-                        IntOffset(offsetX.value.roundToInt(), 0)
-                           },
-                fontSize = 40.sp
+                    .offset { IntOffset(offsetX.value.roundToInt(), 0) },
+                fontSize = 32.sp
             )
-        }
-        TextField(
-            value = text.value, // The current text to display
-            onValueChange = { newText -> // Callback when the text changes
-                text.value = newText
-            },
-            label = { Text("Deine Antwort") }, // Optional label for the TextField
-            modifier = Modifier.padding(top = 16.dp) // Add some space above the TextField
-        )
-       Button(onClick = {
-           if (checkAnswer(text.value, antwort)) {
-               showCorrectDialog.value = true // Show the dialog
-           } else {
-               text.value = "" // Clear input on wrong answer
-               jiggleTrigger = true
-           }
-       }
-       ) {
-           Text("Submit")
-       }
-        if (showCorrectDialog.value) {
-            AlertDialog(
-                onDismissRequest = {
-                    // This is called when the user clicks outside the dialog or presses the back button.
-                    showCorrectDialog.value = false
-                    // emojis = (1..2).random() // Or go to next: (emojis % MAX_RIDDLES) + 1
-                    text.value = "" // Clear the text field for the next riddle
-                },
-                title = {
-                    Text(text = "Richtig!")
-                },
-                text = {
-                    Text(text = "Das war die korrekte Antwort.")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showCorrectDialog.value = false
-                            // Logic to go to the next riddle:
-                            // Example: emojis = if (emojis < 2) emojis + 1 else 1 // Assuming 2 riddles for now
-                            emojis.value = (1..10).random() // Or simply pick another random one as per your original logic
-                            text.value = "" // Clear the text field for the next riddle
-                        }
-                    ) {
-                        Text("Nächstes Rätsel")
+
+            TextField(
+                value = text.value,
+                onValueChange = { newText -> text.value = newText },
+                label = { Text("Deine Antwort") },
+                modifier = Modifier.fillMaxWidth(0.85f)
+            )
+
+            Button(onClick = {
+                if (checkAnswer(text.value, antwort)) {
+                    if (!solvedRiddles.contains(emojis.value)) {
+                        solvedRiddles.add(emojis.value)
+                        correctCount.value++
                     }
+                    if (solvedRiddles.size >= 10) {
+                        showGratulationsDialog.value = true
+                    } else {
+                        do {
+                            emojis.value = (1..10).random()
+                        } while (solvedRiddles.contains(emojis.value))
+                        text.value = ""
+                        showCorrectFlash = true
+                    }
+                } else {
+                    text.value = ""
+                    jiggleTrigger = true
                 }
-            )
+            }) {
+                Text("Submit")
+            }
         }
     }
+
+    if (showGratulationsDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showGratulationsDialog.value = false
+            },
+            title = { Text("Gratulation!") },
+            text = { Text("Du hast alle Rätsel gelöst!") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showGratulationsDialog.value = false
+                    solvedRiddles.clear()
+                    correctCount.value = 0
+                    emojis.value = (1..10).random()
+                    text.value = ""
+                }) {
+                    Text("Neu starten")
+                }
+            }
+        )
+    }
 }
-
-
 
 fun checkAnswer(answer: String, correctAnswer: String): Boolean {
     return answer == correctAnswer
 }
 
-@Preview(showBackground = true,
-        showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SpielApp(){
+fun SpielApp() {
     Spiel(modifier = Modifier
-        .fillMaxSize()
-        .wrapContentSize(Alignment.Center))
+                        .fillMaxSize()
+                        .wrapContentSize(align = Alignment.Center))
 }

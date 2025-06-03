@@ -11,19 +11,19 @@
     <string name="Raetsel_6">🏴‍☠️+⚓️+🌊</string>
     <string name="Raetsel_7">🎬+🍿+👀</string>
     <string name="Raetsel_8">🧛‍♂️+🩸+🌕</string>
-    <string name="Raetsel_9">🐑+👗+🐺</string>
+    <string name="Raetsel_9">🐝+🍯</string>
     <string name="Raetsel_10">🎈+🎉+🥳</string>
 
     //Antworten
     <string name="Antwort_1">Python</string>
     <string name="Antwort_2">Studium</string>
-    <string name="Antwort_3">Detectiv</string>
+    <string name="Antwort_3">Detektiv</string>
     <string name="Antwort_4">Mondmission</string>
     <string name="Antwort_5">Popstar</string>
     <string name="Antwort_6">Pirat</string>
     <string name="Antwort_7">Kino</string>
-    <string name="Antwort_8">Vampier</string>
-    <string name="Antwort_9">Ein Wolf im Schafspelz</string>
+    <string name="Antwort_8">Vampir</string>
+    <string name="Antwort_9">Honig</string>
     <string name="Antwort_10">Party</string>
 
 </resources>
