@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:rotation="0"
+        android:text="Errate das Sprichwort"
+        android:textAlignment="center"
+        android:textSize="60sp"
+        tools:text="Errate das Sprichwort" />
+
+    <EditText
+        android:id="@+id/editTextText"
+        style="@android:style/Widget.EditText"
+        android:layout_width="367dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:text="Antwort"
+        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="206dp"
+        android:layout_height="wrap_content"
+        android:text="Bestätigen" />
+</LinearLayout>
