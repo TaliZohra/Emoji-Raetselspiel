@@ -1,6 +1,6 @@
-##Projekt
+# Projekt
 
-#Emoji-Rätselspiel
+## Emoji-Rätselspiel
 - Nutzer sehen 2 bis 3 Emojis und müssen erraten welches Wort gemeint ist
 - 10 Rätsel
 - Feedback bei falscher Antwort
@@ -11,7 +11,7 @@
 - Realtime Wikipedia "Rick Astley" änderungs abfrage
 - Benachrichtigung falls auf r/AskReddit gepostet oder Rick Astleys Wikipedia Page bearbeitet wurde.
 
-#Entwürfe
+## Entwürfe
 Erster
 ![PENUP_20250619_144423](https://github.com/user-attachments/assets/46091bd3-dc3c-4c36-b5b9-3ab32a077aa6)
 
