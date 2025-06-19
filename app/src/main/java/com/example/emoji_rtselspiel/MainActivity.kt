@@ -303,7 +303,7 @@ fun Spiel(modifier: Modifier = Modifier) {
                     if (newPostsCounter >= postsNeededForNotification) {
                         Log.i("RedditCheck", "$newPostsCounter new posts reached. Sending notification for r/$subredditName.")
                         sendNotification(
-                            title = "Neue Memes!",
+                            title = "Neue Fragen!",
                             message = "$newPostsCounter neue Posts in r/$subredditName seit deiner letzten Benachrichtigung.",
                             context = context,
                             channelId = "reddit_updates" // Eigener Channel für Reddit
